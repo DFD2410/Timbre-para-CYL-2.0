@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timbre Escolar Pro - DFD_Trenes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        :root { --cian: #00f7ff; --fondo: #050505; --panel: #111; --purpura: #9d00ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Orbitron', sans-serif; background: var(--fondo); color: white; }
+        #login-overlay { position: fixed; inset: 0; background: var(--fondo); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-card { background: var(--panel); padding: 35px; border-radius: 25px; border: 2px solid var(--cian); text-align: center; width: 90%; max-width: 400px; }
+        #app { display: none; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
+        .tarjeta { background: var(--panel); width: 100%; max-width: 550px; padding: 25px; border-radius: 30px; border: 2px solid #222; text-align: center; margin-bottom: 20px; }
+        #reloj-actual { font-size: 3rem; color: var(--cian); margin-bottom: 5px; }
+        .pantalla-proximo { background: #000; padding: 15px; border-radius: 20px; border: 2px solid var(--purpura); margin: 10px 0; }
+        #timer-proximo { font-size: 2.8rem; font-weight: 900; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #333; background: #000; color: white; font-family: 'Rajdhani'; }
+        .selector-dias { display: flex; justify-content: space-between; margin-bottom: 15px; background: #000; padding: 10px; border-radius: 10px; border: 1px solid #333; }
+        .dia-check { display: flex; flex-direction: column; align-items: center; font-size: 0.6rem; font-family: 'Rajdhani'; color: var(--cian); }
+        button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; font-family: 'Rajdhani'; }
+        .btn-cian { background: var(--cian); color: #000; }
+        .item-cloud { background: #1a1a1a; padding: 10px; border-radius: 10px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--cian); text-align: left; }
+        .dias-badge { font-size: 0.6rem; color: #666; display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-card">
+            <h2 style="color: var(--cian); margin-bottom: 25px;">SISTEMA TIMBRE</h2>
+            <input type="email" id="correo" placeholder="Correo" autocomplete="off">
+            <input type="password" id="clave" placeholder="Contraseña (6+ caracteres)">
+            <button class="btn-cian" onclick="acceder()">ENTRAR / REGISTRAR</button>
+            <p id="error-msg" style="color: #ff003c; font-size: 0.8rem; margin-top: 15px;"></p>
+        </div>
+    </div>
+
+    <div id="app">
+        <div class="tarjeta">
+            <div id="reloj-actual">00:00:00</div>
+            <div id="dia-semana" style="color: #555; font-size: 0.8rem; margin-bottom: 10px;"></div>
+            <div class="pantalla-proximo">
+                <div id="info-proximo">CARGANDO TIMBRES...</div>
+                <div id="timer-proximo">00:00:00</div>
+            </div>
+            <button onclick="auth.signOut()" style="background:none; color:gray; font-size:0.7rem; border: 1px solid #222; width: auto; padding: 5px 15px;">Cerrar Sesión</button>
+        </div>
+
+        <div class="tarjeta">
+            <h3 style="color: var(--cian); margin-bottom: 10px;">NUEVO TIMBRE</h3>
+            <input type="time" id="h-in" step="1">
+            <input type="text" id="d-in" placeholder="Nombre (Ej: Recreo)">
+            <div class="selector-dias">
+                <label class="dia-check"><input type="checkbox" class="d-check" value="1" checked> Lun</label>
+                <label class="dia-check"><input type="checkbox" class="d-check" value="2" checked> Mar</label>
+                <label class="dia-check"><input type="checkbox" class="d-check" value="3" checked> Mié</label>
+                <label class="dia-check"><input type="checkbox" class="d-check" value="4" checked> Jue</label>
+                <label class="dia-check"><input type="checkbox" class="d-check" value="5" checked> Vie</label>
+            </div>
+            <button class="btn-cian" onclick="subir()">AÑADIR A LA NUBE</button>
+            <div id="lista-cloud" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCnIgaMrFFnqQRnu-mha9NDs1c-xlBIqoc",
+        authDomain: "timbre-c96dc.firebaseapp.com",
+        projectId: "timbre-c96dc",
+        storageBucket: "timbre-c96dc.firebasestorage.app",
+        messagingSenderId: "203518767791",
+        appId: "1:203518767791:web:c27079008efbf420441a5a"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let listaTimbres = [];
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            escuchar(user.uid);
+        } else {
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+        }
+    });
+
+    async function acceder() {
+        const email = document.getElementById('correo').value;
+        const pass = document.getElementById('clave').value;
+        const err = document.getElementById('error-msg');
+        try { await auth.signInWithEmailAndPassword(email, pass); }
+        catch (error) { try { await auth.createUserWithEmailAndPassword(email, pass); } catch (e2) { err.innerText = e2.message; } }
+    }
+
+    // CORRECCIÓN: Función de escucha simplificada para asegurar que el listado aparezca
+    function escuchar(uid) {
+        db.collection("timbres").where("uid", "==", uid)
+        .onSnapshot((snap) => {
+            listaTimbres = [];
+            snap.forEach(doc => {
+                listaTimbres.push({id: doc.id, ...doc.data()});
+            });
+            ordenarYMostrar();
+        }, (error) => {
+            console.error("Error en Firestore:", error);
+            document.getElementById('info-proximo').innerText = "ERROR DE CONEXIÓN";
+        });
+    }
+
+    function ordenarYMostrar() {
+        const diaActual = new Date().getDay();
+        
+        // Ordenar alfabéticamente por hora para que la lista sea legible
+        listaTimbres.sort((a, b) => a.hora.localeCompare(b.hora));
+
+        const html = listaTimbres.map(t => {
+            const diasMapeo = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+            const diasTexto = t.dias ? t.dias.map(d => diasMapeo[d]).join(", ") : "Sin días";
+            return `
+                <div class="item-cloud">
+                    <div>
+                        <span><strong>${t.hora}</strong> - ${t.desc}</span>
+                        <span class="dias-badge">${diasTexto}</span>
+                    </div>
+                    <button onclick="borrar('${t.id}')" style="width:auto; padding:5px 10px; background:red; color:white;">X</button>
+                </div>`;
+        }).join('');
+        
+        document.getElementById('lista-cloud').innerHTML = html || "<p style='color:gray'>No hay timbres guardados.</p>";
+    }
+
+    async function subir() {
+        const h = document.getElementById('h-in').value;
+        const d = document.getElementById('d-in').value || "Timbre";
+        const checks = document.querySelectorAll('.d-check:checked');
+        const diasSeleccionados = Array.from(checks).map(c => c.value);
+
+        if(!h || diasSeleccionados.length === 0) { alert("Pon una hora y elige al menos un día"); return; }
+        
+        const horaFinal = h.length === 5 ? h + ":00" : h;
+        
+        try {
+            await db.collection("timbres").add({ 
+                uid: auth.currentUser.uid, 
+                hora: horaFinal, 
+                desc: d,
+                dias: diasSeleccionados
+            });
+            document.getElementById('h-in').value = "";
+            document.getElementById('d-in').value = "";
+        } catch (e) { alert("Error al guardar: " + e.message); }
+    }
+
+    async function borrar(id) { await db.collection("timbres").doc(id).delete(); }
+
+    // LÓGICA DE RELOJ Y TIMER
+    setInterval(() => {
+        const ahora = new Date();
+        const diaActual = ahora.getDay();
+        document.getElementById('reloj-actual').innerText = ahora.toLocaleTimeString();
+        document.getElementById('dia-semana').innerText = ["DOMINGO", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"][diaActual];
+
+        const proximo = listaTimbres.find(t => {
+            if (!t.dias || !t.dias.includes(diaActual.toString())) return false;
+            let [h, m, s] = t.hora.split(':');
+            let tDate = new Date(); tDate.setHours(h, m, s, 0);
+            return tDate > ahora;
+        });
+
+        if (proximo) {
+            let [h, m, s] = proximo.hora.split(':');
+            let target = new Date(); target.setHours(h, m, s, 0);
+            let diff = target - ahora;
+            let hh = Math.floor(diff/3600000).toString().padStart(2,'0');
+            let mm = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
+            let ss = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
+            document.getElementById('timer-proximo').innerText = `${hh}:${mm}:${ss}`;
+            document.getElementById('info-proximo').innerText = `PRÓXIMO: ${proximo.desc}`;
+        } else {
+            document.getElementById('timer-proximo').innerText = "--:--:--";
+            document.getElementById('info-proximo').innerText = "FIN DE JORNADA";
+        }
+    }, 1000);
+</script>
+</body>
+</html>
