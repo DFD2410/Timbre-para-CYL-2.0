@@ -3,73 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timbre Escolar Pro - DFD_Trenes</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-    
+    <title>TIMBRE CLOUD - ULTRA EDITION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
     <style>
-        :root { --cian: #00f7ff; --fondo: #050505; --panel: #111; --purpura: #9d00ff; }
+        :root { 
+            --cian: #00f7ff; 
+            --fondo: #0a0a0c; 
+            --panel: rgba(20, 20, 25, 0.8); 
+            --purpura: #bc13fe;
+            --rojo: #ff0055;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Orbitron', sans-serif; background: var(--fondo); color: white; }
-        #login-overlay { position: fixed; inset: 0; background: var(--fondo); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-card { background: var(--panel); padding: 35px; border-radius: 25px; border: 2px solid var(--cian); text-align: center; width: 90%; max-width: 400px; }
-        #app { display: none; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
-        .tarjeta { background: var(--panel); width: 100%; max-width: 550px; padding: 25px; border-radius: 30px; border: 2px solid #222; text-align: center; margin-bottom: 20px; }
-        #reloj-actual { font-size: 3rem; color: var(--cian); margin-bottom: 5px; }
-        .pantalla-proximo { background: #000; padding: 15px; border-radius: 20px; border: 2px solid var(--purpura); margin: 10px 0; }
-        #timer-proximo { font-size: 2.8rem; font-weight: 900; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #333; background: #000; color: white; font-family: 'Rajdhani'; }
-        .selector-dias { display: flex; justify-content: space-between; margin-bottom: 15px; background: #000; padding: 10px; border-radius: 10px; border: 1px solid #333; }
-        .dia-check { display: flex; flex-direction: column; align-items: center; font-size: 0.6rem; font-family: 'Rajdhani'; color: var(--cian); }
-        button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; font-family: 'Rajdhani'; }
-        .btn-cian { background: var(--cian); color: #000; }
-        .item-cloud { background: #1a1a1a; padding: 10px; border-radius: 10px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--cian); text-align: left; }
-        .dias-badge { font-size: 0.6rem; color: #666; display: block; }
+        
+        body { 
+            font-family: 'Rajdhani', sans-serif; 
+            background: radial-gradient(circle at center, #1a1a2e 0%, var(--fondo) 100%);
+            color: white; 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- ACCESO --- */
+        #login-overlay { 
+            position: fixed; inset: 0; 
+            background: var(--fondo); 
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 3000; 
+        }
+        .login-card { 
+            background: var(--panel); 
+            padding: 40px; border-radius: 30px; 
+            border: 1px solid var(--cian); 
+            text-align: center; width: 380px;
+            box-shadow: 0 0 50px rgba(0, 247, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* --- DASHBOARD --- */
+        #app { display: none; flex-direction: column; align-items: center; padding: 40px 20px; }
+        
+        .tarjeta { 
+            background: var(--panel); 
+            width: 100%; max-width: 600px; 
+            padding: 30px; border-radius: 35px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            text-align: center; margin-bottom: 25px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        #reloj-actual { 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem; font-weight: 900;
+            color: var(--cian); 
+            text-shadow: 0 0 20px var(--cian);
+            margin-bottom: 5px;
+        }
+
+        #fecha-texto { 
+            color: rgba(255,255,255,0.4); 
+            font-size: 1.1rem; text-transform: uppercase; 
+            letter-spacing: 3px; margin-bottom: 20px;
+        }
+
+        /* --- BIBLIOTECA --- */
+        .seccion-audio { 
+            background: rgba(0,0,0,0.3); 
+            padding: 20px; border-radius: 25px; 
+            margin-bottom: 20px; border: 1px solid rgba(188, 19, 254, 0.3);
+        }
+
+        .audio-item { 
+            background: rgba(255,255,255,0.03); 
+            padding: 12px 20px; border-radius: 15px; 
+            margin-top: 8px; display: flex; justify-content: space-between; 
+            align-items: center; border: 1px solid transparent;
+            transition: 0.3s; cursor: pointer;
+        }
+        .audio-item:hover { background: rgba(255,255,255,0.08); }
+        .audio-item.active { 
+            border-color: var(--cian); 
+            background: rgba(0, 247, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 247, 255, 0.1);
+        }
+
+        /* --- CONTADOR --- */
+        .pantalla-prox { 
+            background: linear-gradient(145deg, #000, #111);
+            padding: 30px; border-radius: 25px; 
+            border: 1px solid var(--purpura);
+            position: relative;
+        }
+        #cuenta-atras { 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem; font-weight: 900; 
+            margin-top: 10px;
+        }
+
+        @keyframes parpadeo { 
+            0%, 100% { color: var(--cian); text-shadow: 0 0 30px var(--cian); } 
+            50% { color: #fff; text-shadow: none; } 
+        }
+        .alerta-inminente { animation: parpadeo 0.6s infinite; }
+
+        /* --- INPUTS Y BOTONES --- */
+        input { 
+            width: 100%; padding: 15px; 
+            border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); 
+            background: rgba(0,0,0,0.5); color: white; 
+            margin-bottom: 12px; font-family: 'Rajdhani'; font-size: 1.1rem;
+        }
+        input:focus { border-color: var(--cian); outline: none; }
+
+        button { 
+            padding: 15px; border-radius: 15px; 
+            border: none; font-weight: 700; cursor: pointer; 
+            font-family: 'Orbitron'; text-transform: uppercase;
+            transition: 0.3s; letter-spacing: 1px;
+        }
+        .btn-cian { 
+            background: var(--cian); color: #000; width: 100%; 
+            box-shadow: 0 0 20px rgba(0, 247, 255, 0.3);
+        }
+        .btn-cian:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 247, 255, 0.5); }
+        
+        .btn-purpura { 
+            background: var(--purpura); color: white; 
+            font-size: 0.8rem; margin-top: 10px; width: 100%;
+        }
+
+        .btn-delete { 
+            background: var(--rojo); color: white; 
+            padding: 6px 12px; font-size: 0.7rem; border-radius: 8px;
+        }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
         <div class="login-card">
-            <h2 style="color: var(--cian); margin-bottom: 25px;">SISTEMA TIMBRE</h2>
-            <input type="email" id="correo" placeholder="Correo" autocomplete="off">
-            <input type="password" id="clave" placeholder="Contraseña (6+ caracteres)">
-            <button class="btn-cian" onclick="acceder()">ENTRAR / REGISTRAR</button>
-            <p id="error-msg" style="color: #ff003c; font-size: 0.8rem; margin-top: 15px;"></p>
+            <h1 style="color:var(--cian); font-family:'Orbitron'; font-size:1.5rem; margin-bottom:25px;">SISTEMA CONTROL</h1>
+            <input type="email" id="correo" placeholder="USUARIO">
+            <input type="password" id="clave" placeholder="CONTRASEÑA">
+            <button class="btn-cian" onclick="acceder()">INICIAR ENLACE</button>
         </div>
     </div>
 
     <div id="app">
         <div class="tarjeta">
             <div id="reloj-actual">00:00:00</div>
-            <div id="dia-semana" style="color: #555; font-size: 0.8rem; margin-bottom: 10px;"></div>
-            <div class="pantalla-proximo">
-                <div id="info-proximo">CARGANDO TIMBRES...</div>
-                <div id="timer-proximo">00:00:00</div>
+            <div id="fecha-texto">CARGANDO...</div>
+            
+            <div class="seccion-audio">
+                <input type="file" id="up-audio" style="display:none" onchange="subirAudio(event)">
+                <button onclick="document.getElementById('up-audio').click()" style="background:rgba(255,255,255,0.05); color:white; font-size:0.7rem; width:100%; border:1px solid rgba(255,255,255,0.1);">+ CARGAR SONIDO DISCO</button>
+                <div id="lista-audios" style="margin:15px 0; max-height: 120px; overflow-y: auto;"></div>
+                <button onclick="activarAudio()" id="btn-act" class="btn-purpura">ACTIVAR NÚCLEO DE AUDIO</button>
             </div>
-            <button onclick="auth.signOut()" style="background:none; color:gray; font-size:0.7rem; border: 1px solid #222; width: auto; padding: 5px 15px;">Cerrar Sesión</button>
+
+            <div class="pantalla-prox">
+                <div id="prox-info" style="font-size:0.9rem; color:var(--purpura); font-weight:700; letter-spacing:2px;">SIGUIENTE EVENTO</div>
+                <div id="cuenta-atras">00:00:00</div>
+            </div>
+            
+            <button onclick="auth.signOut()" style="background:none; color:#444; font-size:0.7rem; margin-top:20px;">DESCONECTAR SISTEMA</button>
         </div>
 
         <div class="tarjeta">
-            <h3 style="color: var(--cian); margin-bottom: 10px;">NUEVO TIMBRE</h3>
+            <h2 style="color:var(--cian); font-family:'Orbitron'; font-size:1.2rem; margin-bottom:20px;">CONFIGURACIÓN NUBE</h2>
             <input type="time" id="h-in" step="1">
-            <input type="text" id="d-in" placeholder="Nombre (Ej: Recreo)">
-            <div class="selector-dias">
-                <label class="dia-check"><input type="checkbox" class="d-check" value="1" checked> Lun</label>
-                <label class="dia-check"><input type="checkbox" class="d-check" value="2" checked> Mar</label>
-                <label class="dia-check"><input type="checkbox" class="d-check" value="3" checked> Mié</label>
-                <label class="dia-check"><input type="checkbox" class="d-check" value="4" checked> Jue</label>
-                <label class="dia-check"><input type="checkbox" class="d-check" value="5" checked> Vie</label>
-            </div>
-            <button class="btn-cian" onclick="subir()">AÑADIR A LA NUBE</button>
-            <div id="lista-cloud" style="margin-top: 20px;"></div>
+            <input type="text" id="d-in" placeholder="ETIQUETA (EJ: RECREO)">
+            <button class="btn-cian" onclick="subir()">GUARDAR TIMBRE</button>
+            
+            <div id="lista-cloud" style="margin-top:25px; text-align:left;"></div>
         </div>
     </div>
 
 <script>
+    // CONFIGURACIÓN FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyCnIgaMrFFnqQRnu-mha9NDs1c-xlBIqoc",
         authDomain: "timbre-c96dc.firebaseapp.com",
@@ -78,118 +193,148 @@
         messagingSenderId: "203518767791",
         appId: "1:203518767791:web:c27079008efbf420441a5a"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    let listaTimbres = [];
 
+    let bib = [];
+    try { bib = JSON.parse(localStorage.getItem('bib_v8')) || []; } catch(e) { bib = []; }
+    let actId = localStorage.getItem('act_v8') || null;
+    let player = new Audio();
+    let isReady = false;
+    let timbres = [];
+
+    // AUDIO
+    function activarAudio() { 
+        player.play().then(() => { 
+            player.pause(); 
+            isReady = true; 
+            document.getElementById('btn-act').innerText="✅ AUDIO SISTEMA ONLINE"; 
+            document.getElementById('btn-act').style.opacity = "0.5";
+        }).catch(()=>{}); 
+    }
+
+    function subirAudio(e) {
+        const f = e.target.files[0];
+        if (f) {
+            const r = new FileReader();
+            r.onload = (ev) => {
+                bib.push({ id: Date.now(), nombre: f.name, data: ev.target.result });
+                guardar();
+            };
+            r.readAsDataURL(f);
+        }
+    }
+
+    function seleccionar(id) {
+        actId = id;
+        localStorage.setItem('act_v8', id);
+        const a = bib.find(x => x.id == id);
+        if (a) player.src = a.data;
+        pintarBib();
+    }
+
+    function borrarAud(id, ev) {
+        ev.stopPropagation();
+        bib = bib.filter(x => x.id != id);
+        if (actId == id) { actId = null; player.src = ""; }
+        guardar();
+    }
+
+    function guardar() { 
+        try { localStorage.setItem('bib_v8', JSON.stringify(bib)); } catch(e) { alert("Memoria llena"); }
+        pintarBib(); 
+    }
+
+    function pintarBib() {
+        document.getElementById('lista-audios').innerHTML = bib.map(a => `
+            <div class="audio-item ${a.id == actId ? 'active' : ''}" onclick="seleccionar(${a.id})">
+                <span style="font-weight:600; font-size:0.8rem;">${a.nombre.substring(0,25)}</span>
+                <button class="btn-delete" onclick="borrarAud(${a.id}, event)">ELIMINAR</button>
+            </div>`).join('') || '<p style="color:#333; font-size:0.8rem;">BIBLIOTECA VACÍA</p>';
+    }
+
+    // FIREBASE LÓGICA
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('app').style.display = 'flex';
-            escuchar(user.uid);
-        } else {
-            document.getElementById('login-overlay').style.display = 'flex';
-            document.getElementById('app').style.display = 'none';
+            db.collection("timbres").where("uid", "==", user.uid).onSnapshot(snap => {
+                timbres = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                pintarTimbres();
+            });
+            pintarBib();
+            if(actId) seleccionar(actId);
         }
     });
 
     async function acceder() {
-        const email = document.getElementById('correo').value;
-        const pass = document.getElementById('clave').value;
-        const err = document.getElementById('error-msg');
-        try { await auth.signInWithEmailAndPassword(email, pass); }
-        catch (error) { try { await auth.createUserWithEmailAndPassword(email, pass); } catch (e2) { err.innerText = e2.message; } }
+        const e = document.getElementById('correo').value;
+        const p = document.getElementById('clave').value;
+        try { await auth.signInWithEmailAndPassword(e, p); } catch(err) { alert("ACCESO DENEGADO"); }
     }
 
-    // CORRECCIÓN: Función de escucha simplificada para asegurar que el listado aparezca
-    function escuchar(uid) {
-        db.collection("timbres").where("uid", "==", uid)
-        .onSnapshot((snap) => {
-            listaTimbres = [];
-            snap.forEach(doc => {
-                listaTimbres.push({id: doc.id, ...doc.data()});
-            });
-            ordenarYMostrar();
-        }, (error) => {
-            console.error("Error en Firestore:", error);
-            document.getElementById('info-proximo').innerText = "ERROR DE CONEXIÓN";
-        });
-    }
-
-    function ordenarYMostrar() {
-        const diaActual = new Date().getDay();
-        
-        // Ordenar alfabéticamente por hora para que la lista sea legible
-        listaTimbres.sort((a, b) => a.hora.localeCompare(b.hora));
-
-        const html = listaTimbres.map(t => {
-            const diasMapeo = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-            const diasTexto = t.dias ? t.dias.map(d => diasMapeo[d]).join(", ") : "Sin días";
-            return `
-                <div class="item-cloud">
-                    <div>
-                        <span><strong>${t.hora}</strong> - ${t.desc}</span>
-                        <span class="dias-badge">${diasTexto}</span>
-                    </div>
-                    <button onclick="borrar('${t.id}')" style="width:auto; padding:5px 10px; background:red; color:white;">X</button>
-                </div>`;
-        }).join('');
-        
-        document.getElementById('lista-cloud').innerHTML = html || "<p style='color:gray'>No hay timbres guardados.</p>";
+    function pintarTimbres() {
+        timbres.sort((a,b) => a.hora.localeCompare(b.hora));
+        document.getElementById('lista-cloud').innerHTML = timbres.map(t => `
+            <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:15px; margin-top:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05);">
+                <div>
+                    <span style="color:var(--cian); font-weight:700; font-family:'Orbitron'; font-size:0.9rem;">${t.hora}</span>
+                    <span style="margin-left:15px; color:#aaa;">${t.desc}</span>
+                </div>
+                <button onclick="borrarT('${t.id}')" class="btn-delete">X</button>
+            </div>`).join('');
     }
 
     async function subir() {
         const h = document.getElementById('h-in').value;
-        const d = document.getElementById('d-in').value || "Timbre";
-        const checks = document.querySelectorAll('.d-check:checked');
-        const diasSeleccionados = Array.from(checks).map(c => c.value);
-
-        if(!h || diasSeleccionados.length === 0) { alert("Pon una hora y elige al menos un día"); return; }
-        
-        const horaFinal = h.length === 5 ? h + ":00" : h;
-        
-        try {
-            await db.collection("timbres").add({ 
-                uid: auth.currentUser.uid, 
-                hora: horaFinal, 
-                desc: d,
-                dias: diasSeleccionados
-            });
-            document.getElementById('h-in').value = "";
-            document.getElementById('d-in').value = "";
-        } catch (e) { alert("Error al guardar: " + e.message); }
+        if(!h) return;
+        await db.collection("timbres").add({ 
+            uid: auth.currentUser.uid, 
+            hora: h.length === 5 ? h+":00" : h, 
+            desc: document.getElementById('d-in').value || "EVENTO", 
+            dias: ["1","2","3","4","5"] 
+        });
     }
 
-    async function borrar(id) { await db.collection("timbres").doc(id).delete(); }
+    async function borrarT(id) { await db.collection("timbres").doc(id).delete(); }
 
-    // LÓGICA DE RELOJ Y TIMER
+    // SINCRONIZACIÓN MAESTRA
     setInterval(() => {
         const ahora = new Date();
-        const diaActual = ahora.getDay();
+        const hAct = ahora.toTimeString().split(' ')[0];
+        
         document.getElementById('reloj-actual').innerText = ahora.toLocaleTimeString();
-        document.getElementById('dia-semana').innerText = ["DOMINGO", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"][diaActual];
+        document.getElementById('fecha-texto').innerText = ahora.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
-        const proximo = listaTimbres.find(t => {
-            if (!t.dias || !t.dias.includes(diaActual.toString())) return false;
-            let [h, m, s] = t.hora.split(':');
-            let tDate = new Date(); tDate.setHours(h, m, s, 0);
-            return tDate > ahora;
-        });
+        timbres.forEach(t => { if(t.hora === hAct && isReady) { player.currentTime = 0; player.play(); } });
 
-        if (proximo) {
-            let [h, m, s] = proximo.hora.split(':');
+        const prox = timbres.filter(t => t.hora > hAct).sort((a,b) => a.hora.localeCompare(b.hora))[0];
+        const displayC = document.getElementById('cuenta-atras');
+
+        if(prox) {
+            let [h, m, s] = prox.hora.split(':');
             let target = new Date(); target.setHours(h, m, s, 0);
-            let diff = target - ahora;
-            let hh = Math.floor(diff/3600000).toString().padStart(2,'0');
-            let mm = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
-            let ss = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
-            document.getElementById('timer-proximo').innerText = `${hh}:${mm}:${ss}`;
-            document.getElementById('info-proximo').innerText = `PRÓXIMO: ${proximo.desc}`;
+            
+            let diffT = target.getTime() - ahora.getTime();
+            let segs = Math.floor(diffT / 1000);
+
+            if (segs <= 5 && segs >= 0) displayC.classList.add('alerta-inminente');
+            else displayC.classList.remove('alerta-inminente');
+
+            if (diffT <= 0) {
+                displayC.innerText = "00:00:00";
+            } else {
+                let hh = Math.floor(segs / 3600).toString().padStart(2, '0');
+                let mm = Math.floor((segs % 3600) / 60).toString().padStart(2, '0');
+                let ss = (segs % 60).toString().padStart(2, '0');
+                displayC.innerText = `${hh}:${mm}:${ss}`;
+            }
+            document.getElementById('prox-info').innerText = `SIGUIENTE: ${prox.desc.toUpperCase()} (${prox.hora})`;
         } else {
-            document.getElementById('timer-proximo').innerText = "--:--:--";
-            document.getElementById('info-proximo').innerText = "FIN DE JORNADA";
+            displayC.innerText = "00:00:00";
+            displayC.classList.remove('alerta-inminente');
+            document.getElementById('prox-info').innerText = "FIN DE OPERACIONES";
         }
     }, 1000);
 </script>
