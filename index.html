@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIMBRE CLOUD - ULTRA EDITION</title>
+    <title>SISTEMA TIMBRE CLOUD - ULTRA EDITION</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -16,130 +16,51 @@
             --purpura: #bc13fe;
             --rojo: #ff0055;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body { 
             font-family: 'Rajdhani', sans-serif; 
             background: radial-gradient(circle at center, #1a1a2e 0%, var(--fondo) 100%);
-            color: white; 
-            min-height: 100vh;
-            overflow-x: hidden;
+            color: white; min-height: 100vh; overflow-x: hidden;
         }
-
-        /* --- ACCESO --- */
-        #login-overlay { 
-            position: fixed; inset: 0; 
-            background: var(--fondo); 
-            display: flex; justify-content: center; align-items: center; 
-            z-index: 3000; 
-        }
-        .login-card { 
-            background: var(--panel); 
-            padding: 40px; border-radius: 30px; 
-            border: 1px solid var(--cian); 
-            text-align: center; width: 380px;
-            box-shadow: 0 0 50px rgba(0, 247, 255, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        /* --- DASHBOARD --- */
+        #login-overlay { position: fixed; inset: 0; background: var(--fondo); display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .login-card { background: var(--panel); padding: 40px; border-radius: 30px; border: 1px solid var(--cian); text-align: center; width: 380px; backdrop-filter: blur(10px); }
         #app { display: none; flex-direction: column; align-items: center; padding: 40px 20px; }
-        
         .tarjeta { 
-            background: var(--panel); 
-            width: 100%; max-width: 600px; 
-            padding: 30px; border-radius: 35px; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            text-align: center; margin-bottom: 25px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: var(--panel); width: 100%; max-width: 600px; 
+            padding: 30px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.05); 
+            text-align: center; margin-bottom: 25px; backdrop-filter: blur(15px);
         }
-
-        #reloj-actual { 
-            font-family: 'Orbitron', sans-serif;
-            font-size: 4rem; font-weight: 900;
-            color: var(--cian); 
-            text-shadow: 0 0 20px var(--cian);
-            margin-bottom: 5px;
-        }
-
-        #fecha-texto { 
-            color: rgba(255,255,255,0.4); 
-            font-size: 1.1rem; text-transform: uppercase; 
-            letter-spacing: 3px; margin-bottom: 20px;
-        }
-
-        /* --- BIBLIOTECA --- */
-        .seccion-audio { 
-            background: rgba(0,0,0,0.3); 
-            padding: 20px; border-radius: 25px; 
-            margin-bottom: 20px; border: 1px solid rgba(188, 19, 254, 0.3);
-        }
-
-        .audio-item { 
-            background: rgba(255,255,255,0.03); 
-            padding: 12px 20px; border-radius: 15px; 
-            margin-top: 8px; display: flex; justify-content: space-between; 
-            align-items: center; border: 1px solid transparent;
-            transition: 0.3s; cursor: pointer;
-        }
-        .audio-item:hover { background: rgba(255,255,255,0.08); }
-        .audio-item.active { 
-            border-color: var(--cian); 
-            background: rgba(0, 247, 255, 0.05);
-            box-shadow: 0 0 15px rgba(0, 247, 255, 0.1);
-        }
-
-        /* --- CONTADOR --- */
+        #reloj-actual { font-family: 'Orbitron', sans-serif; font-size: 4rem; font-weight: 900; color: var(--cian); text-shadow: 0 0 20px var(--cian); }
+        #fecha-texto { color: rgba(255,255,255,0.4); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 25px; }
+        
+        /* CUENTA ATRÁS ENCIMA */
         .pantalla-prox { 
             background: linear-gradient(145deg, #000, #111);
-            padding: 30px; border-radius: 25px; 
-            border: 1px solid var(--purpura);
-            position: relative;
+            padding: 25px; border-radius: 25px; border: 1px solid var(--purpura);
+            margin-bottom: 25px; box-shadow: 0 0 20px rgba(188, 19, 254, 0.1);
         }
-        #cuenta-atras { 
-            font-family: 'Orbitron', sans-serif;
-            font-size: 3.5rem; font-weight: 900; 
-            margin-top: 10px;
-        }
+        #cuenta-atras { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; font-weight: 900; }
 
-        @keyframes parpadeo { 
-            0%, 100% { color: var(--cian); text-shadow: 0 0 30px var(--cian); } 
-            50% { color: #fff; text-shadow: none; } 
+        /* SELECCIÓN AUDIO DEBAJO */
+        .seccion-audio { 
+            background: rgba(0,0,0,0.3); padding: 20px; border-radius: 25px; 
+            border: 1px solid rgba(188, 19, 254, 0.3);
         }
-        .alerta-inminente { animation: parpadeo 0.6s infinite; }
+        .audio-item { 
+            background: rgba(255,255,255,0.03); padding: 12px; border-radius: 15px; 
+            margin-top: 8px; display: flex; justify-content: space-between; 
+            align-items: center; border: 1px solid transparent; transition: 0.3s;
+        }
+        .audio-item.active { border-color: var(--cian); background: rgba(0, 247, 255, 0.05); }
 
-        /* --- INPUTS Y BOTONES --- */
-        input { 
-            width: 100%; padding: 15px; 
-            border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); 
-            background: rgba(0,0,0,0.5); color: white; 
-            margin-bottom: 12px; font-family: 'Rajdhani'; font-size: 1.1rem;
-        }
-        input:focus { border-color: var(--cian); outline: none; }
+        @keyframes parpadeo { 0%, 100% { color: var(--cian); } 50% { color: #fff; } }
+        .alerta-inminente { animation: parpadeo 0.6s infinite; text-shadow: 0 0 30px var(--cian); }
 
-        button { 
-            padding: 15px; border-radius: 15px; 
-            border: none; font-weight: 700; cursor: pointer; 
-            font-family: 'Orbitron'; text-transform: uppercase;
-            transition: 0.3s; letter-spacing: 1px;
-        }
-        .btn-cian { 
-            background: var(--cian); color: #000; width: 100%; 
-            box-shadow: 0 0 20px rgba(0, 247, 255, 0.3);
-        }
-        .btn-cian:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 247, 255, 0.5); }
-        
-        .btn-purpura { 
-            background: var(--purpura); color: white; 
-            font-size: 0.8rem; margin-top: 10px; width: 100%;
-        }
-
-        .btn-delete { 
-            background: var(--rojo); color: white; 
-            padding: 6px 12px; font-size: 0.7rem; border-radius: 8px;
-        }
+        input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); color: white; margin-bottom: 12px; font-family: 'Rajdhani'; }
+        button { padding: 15px; border-radius: 15px; border: none; font-weight: 700; cursor: pointer; font-family: 'Orbitron'; text-transform: uppercase; transition: 0.3s; }
+        .btn-cian { background: var(--cian); color: #000; width: 100%; }
+        .btn-purpura { background: var(--purpura); color: white; width: 100%; margin-top: 10px; }
+        .btn-delete { background: var(--rojo); color: white; padding: 6px 12px; font-size: 0.7rem; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -158,33 +79,31 @@
             <div id="reloj-actual">00:00:00</div>
             <div id="fecha-texto">CARGANDO...</div>
             
-            <div class="seccion-audio">
-                <input type="file" id="up-audio" style="display:none" onchange="subirAudio(event)">
-                <button onclick="document.getElementById('up-audio').click()" style="background:rgba(255,255,255,0.05); color:white; font-size:0.7rem; width:100%; border:1px solid rgba(255,255,255,0.1);">+ CARGAR SONIDO DISCO</button>
-                <div id="lista-audios" style="margin:15px 0; max-height: 120px; overflow-y: auto;"></div>
-                <button onclick="activarAudio()" id="btn-act" class="btn-purpura">ACTIVAR NÚCLEO DE AUDIO</button>
-            </div>
-
             <div class="pantalla-prox">
                 <div id="prox-info" style="font-size:0.9rem; color:var(--purpura); font-weight:700; letter-spacing:2px;">SIGUIENTE EVENTO</div>
                 <div id="cuenta-atras">00:00:00</div>
             </div>
+
+            <div class="seccion-audio">
+                <input type="file" id="up-audio" style="display:none" onchange="subirAudio(event)">
+                <button onclick="document.getElementById('up-audio').click()" style="background:rgba(255,255,255,0.05); color:white; font-size:0.7rem; width:100%; border:1px solid rgba(255,255,255,0.1);">+ CARGAR SONIDO DISCO</button>
+                <div id="lista-audios" style="margin:15px 0; max-height: 120px; overflow-y: auto;"></div>
+                <button onclick="activarAudio()" id="btn-act" class="btn-purpura">⚠️ ACTIVAR AUDIO (NECESARIO)</button>
+            </div>
             
-            <button onclick="auth.signOut()" style="background:none; color:#444; font-size:0.7rem; margin-top:20px;">DESCONECTAR SISTEMA</button>
+            <button onclick="auth.signOut()" style="background:none; color:#444; font-size:0.7rem; margin-top:20px;">DESCONECTAR</button>
         </div>
 
         <div class="tarjeta">
-            <h2 style="color:var(--cian); font-family:'Orbitron'; font-size:1.2rem; margin-bottom:20px;">CONFIGURACIÓN NUBE</h2>
+            <h2 style="color:var(--cian); font-family:'Orbitron'; font-size:1.2rem; margin-bottom:20px;">NUEVO HORARIO</h2>
             <input type="time" id="h-in" step="1">
-            <input type="text" id="d-in" placeholder="ETIQUETA (EJ: RECREO)">
-            <button class="btn-cian" onclick="subir()">GUARDAR TIMBRE</button>
-            
+            <input type="text" id="d-in" placeholder="ETIQUETA (EJ: SALIDA)">
+            <button class="btn-cian" onclick="subir()">GUARDAR EN NUBE</button>
             <div id="lista-cloud" style="margin-top:25px; text-align:left;"></div>
         </div>
     </div>
 
 <script>
-    // CONFIGURACIÓN FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyCnIgaMrFFnqQRnu-mha9NDs1c-xlBIqoc",
         authDomain: "timbre-c96dc.firebaseapp.com",
@@ -204,14 +123,15 @@
     let isReady = false;
     let timbres = [];
 
-    // AUDIO
+    // FIX PARA GITHUB: Desbloqueo forzado de audio
     function activarAudio() { 
+        player.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=="; // Silencio corto
         player.play().then(() => { 
-            player.pause(); 
             isReady = true; 
-            document.getElementById('btn-act').innerText="✅ AUDIO SISTEMA ONLINE"; 
-            document.getElementById('btn-act').style.opacity = "0.5";
-        }).catch(()=>{}); 
+            document.getElementById('btn-act').innerText="✅ AUDIO DESBLOQUEADO"; 
+            document.getElementById('btn-act').style.background = "#004400";
+            if(actId) seleccionar(actId); // Recargar el audio real
+        }).catch(e => alert("Haz clic de nuevo para permitir sonido")); 
     }
 
     function subirAudio(e) {
@@ -230,7 +150,10 @@
         actId = id;
         localStorage.setItem('act_v8', id);
         const a = bib.find(x => x.id == id);
-        if (a) player.src = a.data;
+        if (a) {
+            player.src = a.data;
+            player.load();
+        }
         pintarBib();
     }
 
@@ -250,11 +173,10 @@
         document.getElementById('lista-audios').innerHTML = bib.map(a => `
             <div class="audio-item ${a.id == actId ? 'active' : ''}" onclick="seleccionar(${a.id})">
                 <span style="font-weight:600; font-size:0.8rem;">${a.nombre.substring(0,25)}</span>
-                <button class="btn-delete" onclick="borrarAud(${a.id}, event)">ELIMINAR</button>
-            </div>`).join('') || '<p style="color:#333; font-size:0.8rem;">BIBLIOTECA VACÍA</p>';
+                <button class="btn-delete" onclick="borrarAud(${a.id}, event)">X</button>
+            </div>`).join('') || '<p style="color:#444; font-size:0.8rem;">SIN SONIDOS</p>';
     }
 
-    // FIREBASE LÓGICA
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('login-overlay').style.display = 'none';
@@ -271,17 +193,15 @@
     async function acceder() {
         const e = document.getElementById('correo').value;
         const p = document.getElementById('clave').value;
-        try { await auth.signInWithEmailAndPassword(e, p); } catch(err) { alert("ACCESO DENEGADO"); }
+        try { await auth.signInWithEmailAndPassword(e, p); } catch(err) { alert("ERROR ACCESO"); }
     }
 
     function pintarTimbres() {
         timbres.sort((a,b) => a.hora.localeCompare(b.hora));
         document.getElementById('lista-cloud').innerHTML = timbres.map(t => `
             <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:15px; margin-top:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05);">
-                <div>
-                    <span style="color:var(--cian); font-weight:700; font-family:'Orbitron'; font-size:0.9rem;">${t.hora}</span>
-                    <span style="margin-left:15px; color:#aaa;">${t.desc}</span>
-                </div>
+                <span style="color:var(--cian); font-weight:700; font-family:'Orbitron'; font-size:0.9rem;">${t.hora}</span>
+                <span style="color:#aaa;">${t.desc}</span>
                 <button onclick="borrarT('${t.id}')" class="btn-delete">X</button>
             </div>`).join('');
     }
@@ -299,7 +219,6 @@
 
     async function borrarT(id) { await db.collection("timbres").doc(id).delete(); }
 
-    // SINCRONIZACIÓN MAESTRA
     setInterval(() => {
         const ahora = new Date();
         const hAct = ahora.toTimeString().split(' ')[0];
@@ -307,7 +226,13 @@
         document.getElementById('reloj-actual').innerText = ahora.toLocaleTimeString();
         document.getElementById('fecha-texto').innerText = ahora.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
-        timbres.forEach(t => { if(t.hora === hAct && isReady) { player.currentTime = 0; player.play(); } });
+        // Lógica de disparo de sonido
+        timbres.forEach(t => { 
+            if(t.hora === hAct && isReady) { 
+                player.currentTime = 0; 
+                player.play().catch(e => console.log("Bloqueo de audio")); 
+            } 
+        });
 
         const prox = timbres.filter(t => t.hora > hAct).sort((a,b) => a.hora.localeCompare(b.hora))[0];
         const displayC = document.getElementById('cuenta-atras');
@@ -315,7 +240,6 @@
         if(prox) {
             let [h, m, s] = prox.hora.split(':');
             let target = new Date(); target.setHours(h, m, s, 0);
-            
             let diffT = target.getTime() - ahora.getTime();
             let segs = Math.floor(diffT / 1000);
 
@@ -330,7 +254,7 @@
                 let ss = (segs % 60).toString().padStart(2, '0');
                 displayC.innerText = `${hh}:${mm}:${ss}`;
             }
-            document.getElementById('prox-info').innerText = `SIGUIENTE: ${prox.desc.toUpperCase()} (${prox.hora})`;
+            document.getElementById('prox-info').innerText = `SIGUIENTE: ${prox.desc.toUpperCase()}`;
         } else {
             displayC.innerText = "00:00:00";
             displayC.classList.remove('alerta-inminente');
