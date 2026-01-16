@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA TIMBRE v22</title>
+    <title>SISTEMA TIMBRE v23.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -13,39 +13,53 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Rajdhani', sans-serif; background: var(--fondo); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; }
         
-        #app { display: none; width: 100%; max-width: 650px; padding-top: 10px; }
-        .tarjeta { background: var(--panel); padding: 25px; border-radius: 30px; border: 1px solid #222; text-align: center; margin-bottom: 20px; }
+        #app { display: none; width: 100%; max-width: 650px; padding-top: 40px; position: relative; }
         
+        /* BOTÓN CERRAR SESIÓN MEJORADO */
+        .header-tools { width: 100%; display: flex; justify-content: flex-end; margin-bottom: 10px; }
+        .btn-logout { 
+            background: var(--rojo); color: white; border: none; 
+            padding: 10px 20px; border-radius: 12px; font-family: 'Orbitron';
+            font-size: 0.8rem; cursor: pointer; font-weight: 900;
+            box-shadow: 0 0 15px rgba(255,0,68,0.4); transition: 0.3s;
+        }
+        .btn-logout:hover { transform: scale(1.05); background: #cc0033; }
+
+        .tarjeta { background: var(--panel); padding: 25px; border-radius: 30px; border: 1px solid #222; text-align: center; margin-bottom: 20px; }
         #reloj-actual { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; color: var(--cian); text-shadow: 0 0 20px var(--cian); }
         #tipo-dia { font-size: 1rem; padding: 8px 20px; border-radius: 50px; display: inline-block; margin: 10px 0; font-weight: 900; text-transform: uppercase; }
         
         .pantalla-prox { background: #000; padding: 20px; border-radius: 25px; border: 3px solid var(--purpura); margin: 15px 0; }
         #cuenta-atras { font-family: 'Orbitron', sans-serif; font-size: 4.5rem; font-weight: 900; }
         
+        /* ALERTAS TEMPORALES */
         .alerta-30s { color: var(--rojo) !important; text-shadow: 0 0 15px var(--rojo); }
         @keyframes parpadeo { 0%, 100% { opacity: 1; color: var(--rojo); } 50% { opacity: 0.2; color: white; } }
         .parpadeo-5s { animation: parpadeo 0.4s infinite; }
 
         .item-cloud { background: #111; padding: 15px; border-radius: 20px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
         .btn-cian { background: var(--cian); color: #000; font-weight: 900; width: 100%; padding: 15px; border-radius: 15px; border: none; cursor: pointer; font-family: 'Orbitron'; }
-        .btn-act { background: var(--purpura); color: white; margin-top: 15px; padding: 15px; border-radius: 15px; border: none; cursor: pointer; width: 100%; font-family: 'Orbitron'; }
     </style>
 </head>
 <body>
 
     <div id="login-overlay" style="position:fixed; inset:0; background:#000; display:flex; justify-content:center; align-items:center; z-index:5000;">
-        <div style="background:#111; padding:30px; border-radius:25px; border:2px solid var(--cian); width:360px; text-align:center;">
-            <h2 style="color:var(--cian); font-family:'Orbitron'; margin-bottom:20px;">ACCESO TIMBRE</h2>
-            <input type="email" id="correo" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
-            <input type="password" id="clave" placeholder="Contraseña" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
-            <button class="btn-cian" onclick="ejecutarAuth()">ENTRAR / REGISTRAR</button>
+        <div style="background:#111; padding:30px; border-radius:25px; border:2px solid var(--cian); width:340px; text-align:center;">
+            <h2 style="color:var(--cian); font-family:'Orbitron'; margin-bottom:20px;">ACCESO CLOUD</h2>
+            <input type="email" id="correo" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:8px;">
+            <input type="password" id="clave" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:8px;">
+            <button class="btn-cian" onclick="ejecutarAuth()">INICIAR SESIÓN / REGISTRO</button>
         </div>
     </div>
 
     <div id="app">
+        <div class="header-tools">
+            <button class="btn-logout" onclick="auth.signOut()">CERRAR SESIÓN</button>
+        </div>
+
         <div class="tarjeta">
             <div id="fecha-texto" style="font-size:1.2rem; color:#aaa; text-transform:uppercase;">...</div>
-            <div id="tipo-dia">CARGANDO CALENDARIO...</div>
+            <div id="tipo-dia">DÍA LECTIVO</div>
             <div id="reloj-actual">00:00:00</div>
             
             <div class="pantalla-prox">
@@ -53,16 +67,16 @@
             </div>
 
             <div style="background:#000; padding:20px; border-radius:25px; border:1px solid #222; text-align: left;">
-                <p id="audio-label" style="font-weight:bold; margin-bottom:15px; color:var(--cian);">Subre un audio</p>
+                <p id="audio-label" style="font-weight:bold; color:var(--cian); font-size:0.8rem; margin-bottom:10px;">Audio No Vinculado</p>
                 <input type="file" id="f-in" style="display:none" accept="audio/*" onchange="subirAudio(this)">
-                <button onclick="document.getElementById('f-in').click()" class="btn-cian" style="font-size:0.8rem;">📤 CARGAR MP3</button>
-                <button onclick="activarAudio()" id="btn-master" class="btn-act">🔓 ACTIVAR SONIDO</button>
+                <button onclick="document.getElementById('f-in').click()" class="btn-cian" style="font-size:0.8rem; margin-bottom:10px;">📤 CARGAR MP3</button>
+                <button onclick="activarAudio()" id="btn-master" style="background:var(--purpura); color:white; width:100%; padding:12px; border-radius:12px; border:none; cursor:pointer; font-family:'Orbitron';">🔓 ACTIVAR SONIDO</button>
             </div>
         </div>
 
         <div class="tarjeta">
             <input type="time" id="h-in" step="1" style="font-size:1.5rem; width:100%; background:#000; color:#fff; padding:10px; border-radius:10px; margin-bottom:10px;">
-            <div style="display:flex; justify-content:space-around; margin-bottom:15px;">
+            <div style="display:flex; justify-content:space-around; margin:10px 0;">
                 <label><input type="checkbox" class="d-check" value="1" checked> L</label>
                 <label><input type="checkbox" class="d-check" value="2" checked> M</label>
                 <label><input type="checkbox" class="d-check" value="3" checked> X</label>
@@ -75,7 +89,6 @@
     </div>
 
 <script>
-    // CONFIGURACIÓN FIREBASE (Mantén la tuya)
     const firebaseConfig = {
         apiKey: "AIzaSyCnIgaMrFFnqQRnu-mha9NDs1c-xlBIqoc",
         authDomain: "timbre-c96dc.firebaseapp.com",
@@ -92,27 +105,6 @@
     let audioUnlocked = false;
     let timbres = [];
     let audiosCloud = [];
-
-    // --- CONFIGURACIÓN DEL CALENDARIO ESCOLAR ---
-    // Añade aquí los días festivos o especiales (Formato: 'DD/MM')
-    const calendarioEscolar = {
-        festivos: ['25/12', '01/01', '06/01', '01/05', '12/10', '01/11', '06/12', '08/12'],
-        puentes: ['07/12'],
-        vacaciones: { inicio: '23/12', fin: '07/01' } // Ejemplo Navidad
-    };
-
-    function obtenerTipoDia(fecha) {
-        const diaSemana = fecha.getDay();
-        const diaMes = String(fecha.getDate()).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const hoy = `${diaMes}/${mes}`;
-
-        if (calendarioEscolar.festivos.includes(hoy)) return { txt: "FESTIVO NACIONAL", col: "#ff0044" };
-        if (calendarioEscolar.puentes.includes(hoy)) return { txt: "PUENTE ESCOLAR", col: "#bc13fe" };
-        if (diaSemana === 0 || diaSemana === 6) return { txt: "FIN DE SEMANA", col: "#444" };
-        
-        return { txt: "DÍA LECTIVO", col: "#004422" };
-    }
 
     async function ejecutarAuth() {
         const e = document.getElementById('correo').value;
@@ -145,77 +137,5 @@
                 timbres = snap.docs.map(doc => ({id: doc.id, ...doc.data()})); 
                 pintarTimbres(); 
             });
-            db.collection("biblioteca").where("uid", "==", user.uid).onSnapshot(snap => { 
-                audiosCloud = snap.docs.map(doc => ({id: doc.id, ...doc.data()})); 
-            });
-            db.collection("config").doc(user.uid).onSnapshot(doc => {
-                if(doc.exists) {
-                    const id = doc.data().audioActivoId;
-                    const audio = audiosCloud.find(a => a.id === id);
-                    if(audio) { player.src = audio.data; document.getElementById('audio-label').innerText = "VINCULADO: " + audio.nombre; }
-                }
-            });
-        }
-    });
-
-    function pintarTimbres() {
-        const diasSem = ["D", "L", "M", "X", "J", "V", "S"];
-        timbres.sort((a,b) => a.hora.localeCompare(b.hora));
-        document.getElementById('lista-cloud').innerHTML = timbres.map(t => `
-            <div class="item-cloud">
-                <div style="text-align:left;">
-                    <span style="font-family:Orbitron; font-size:1.8rem; color:var(--cian); display:block;">${t.hora.substring(0,5)}</span>
-                    <span style="color:var(--purpura); font-weight:bold;">${t.dias ? t.dias.map(d => diasSem[d]).join(" ") : ""}</span>
-                </div>
-                <button onclick="db.collection('timbres').doc('${t.id}').delete()" style="background:#333; color:white; border:none; padding:10px 15px; border-radius:12px; cursor:pointer;">BORRAR</button>
-            </div>`).join('');
-    }
-
-    async function subirTimbre() {
-        const h = document.getElementById('h-in').value;
-        const dias = Array.from(document.querySelectorAll('.d-check:checked')).map(c => c.value);
-        if(!h || dias.length === 0) return;
-        await db.collection("timbres").add({ uid: auth.currentUser.uid, hora: h.length === 5 ? h+":00" : h, dias: dias });
-    }
-
-    setInterval(() => {
-        const ahora = new Date();
-        const diaSem = ahora.getDay();
-        const hStr = ahora.toTimeString().split(' ')[0];
-        
-        // Actualizar UI
-        document.getElementById('reloj-actual').innerText = ahora.toLocaleTimeString();
-        document.getElementById('fecha-texto').innerText = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-        
-        const tipo = obtenerTipoDia(ahora);
-        const badge = document.getElementById('tipo-dia');
-        badge.innerText = tipo.txt;
-        badge.style.background = tipo.col;
-
-        // Disparo de Timbre
-        timbres.forEach(t => { 
-            if(t.hora === hStr && t.dias.includes(diaSem.toString()) && audioUnlocked) { 
-                player.currentTime = 0; player.play(); 
-            } 
-        });
-
-        // Cuenta atrás
-        const prox = timbres.filter(t => t.dias.includes(diaSem.toString()) && t.hora > hStr).sort((a,b) => a.hora.localeCompare(b.hora))[0];
-        const dispC = document.getElementById('cuenta-atras');
-        if(prox) {
-            let [h, m, s] = prox.hora.split(':');
-            let tD = new Date(); tD.setHours(h, m, s, 0);
-            let diff = Math.floor((tD.getTime() - ahora.getTime()) / 1000);
-            
-            dispC.classList.remove('alerta-30s', 'parpadeo-5s');
-            if(diff <= 5 && diff >= 0) dispC.classList.add('parpadeo-5s');
-            else if(diff <= 30 && diff >= 0) dispC.classList.add('alerta-30s');
-            
-            if(diff < 0) diff = 0;
-            let hh = Math.floor(diff/3600).toString().padStart(2,'0'), mm = Math.floor((diff%3600)/60).toString().padStart(2,'0'), ss = (diff%60).toString().padStart(2,'0');
-            dispC.innerText = `${hh}:${mm}:${ss}`;
-        } else { dispC.innerText = "00:00:00"; }
-    }, 1000);
-</script>
-</body>
-</html>
+            db.collection("biblioteca").where("uid", "==", user.uid).onSnapshot(snap => { audiosCloud = snap.docs.map(doc => ({id: doc.id, ...doc.data()})); });
+            db.collection("config").doc(user
