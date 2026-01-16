@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA TIMBRE v24</title>
+    <title>SISTEMA TIMBRE v25</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -23,13 +23,14 @@
         .pantalla-prox { background: #000; padding: 20px; border-radius: 25px; border: 3px solid var(--purpura); margin: 15px 0; }
         #cuenta-atras { font-family: 'Orbitron', sans-serif; font-size: 4.5rem; font-weight: 900; }
         
-        /* ALERTAS TEMPORALES */
         .alerta-30s { color: var(--rojo) !important; text-shadow: 0 0 15px var(--rojo); }
         @keyframes parpadeo { 0%, 100% { opacity: 1; color: var(--rojo); } 50% { opacity: 0.2; color: white; } }
         .parpadeo-5s { animation: parpadeo 0.4s infinite; }
 
         .item-cloud { background: #111; padding: 15px; border-radius: 20px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
         .btn-cian { background: var(--cian); color: #000; font-weight: 900; width: 100%; padding: 15px; border-radius: 15px; border: none; cursor: pointer; font-family: 'Orbitron'; }
+        
+        input { background: #000; color: white; border: 1px solid #333; width: 100%; padding: 12px; border-radius: 10px; margin-bottom: 10px; font-family: 'Rajdhani'; font-size: 1.1rem; }
     </style>
 </head>
 <body>
@@ -37,9 +38,9 @@
     <div id="login-overlay" style="position:fixed; inset:0; background:#000; display:flex; justify-content:center; align-items:center; z-index:5000;">
         <div style="background:#111; padding:40px; border-radius:30px; border:2px solid var(--cian); width:340px; text-align:center;">
             <h2 style="color:var(--cian); font-family:'Orbitron'; margin-bottom:20px;">ACCESO CLOUD</h2>
-            <input type="email" id="correo" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
-            <input type="password" id="clave" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
-            <button class="btn-cian" onclick="ejecutarAuth()">INICIAR SESIÓN / REGISTRO</button>
+            <input type="email" id="correo" placeholder="Email">
+            <input type="password" id="clave" placeholder="Password">
+            <button class="btn-cian" onclick="ejecutarAuth()">INICIAR SESIÓN</button>
         </div>
     </div>
 
@@ -59,7 +60,9 @@
         </div>
 
         <div class="tarjeta">
-            <input type="time" id="h-in" step="1" style="font-size:1.5rem; width:100%; background:#000; color:#fff; padding:10px; border-radius:10px; margin-bottom:10px;">
+            <h3 style="color:var(--cian); margin-bottom:10px; font-family:Orbitron; font-size:1rem;">NUEVO TIMBRE</h3>
+            <input type="text" id="t-nombre" placeholder="Nombre (ej: Recreo, Salida...)">
+            <input type="time" id="h-in" step="1" style="font-size:1.5rem;">
             <div style="display:flex; justify-content:space-around; margin:10px 0;">
                 <label><input type="checkbox" class="d-check" value="1" checked> L</label>
                 <label><input type="checkbox" class="d-check" value="2" checked> M</label>
@@ -141,8 +144,9 @@
         document.getElementById('lista-cloud').innerHTML = timbres.map(t => `
             <div class="item-cloud">
                 <div style="text-align:left;">
-                    <span style="font-family:Orbitron; font-size:1.8rem; color:var(--cian); display:block;">${t.hora.substring(0,5)}</span>
-                    <span style="color:var(--purpura); font-weight:bold;">${t.dias ? t.dias.map(d => dSem[d]).join(" ") : ""}</span>
+                    <span style="color:var(--cian); font-weight:bold; font-size:0.8rem; text-transform:uppercase;">${t.nombre || 'TIMBRE'}</span>
+                    <span style="font-family:Orbitron; font-size:1.8rem; color:white; display:block; line-height:1;">${t.hora.substring(0,5)}</span>
+                    <span style="color:var(--purpura); font-weight:bold; font-size:0.9rem;">${t.dias ? t.dias.map(d => dSem[d]).join(" ") : ""}</span>
                 </div>
                 <button onclick="db.collection('timbres').doc('${t.id}').delete()" style="background:#333; color:white; border:none; padding:10px; border-radius:10px; cursor:pointer;">X</button>
             </div>`).join('');
@@ -150,9 +154,11 @@
 
     async function subirTimbre() {
         const h = document.getElementById('h-in').value;
+        const n = document.getElementById('t-nombre').value;
         const dias = Array.from(document.querySelectorAll('.d-check:checked')).map(c => c.value);
         if(!h || dias.length === 0) return;
-        await db.collection("timbres").add({ uid: auth.currentUser.uid, hora: h.length === 5 ? h+":00" : h, dias: dias });
+        await db.collection("timbres").add({ uid: auth.currentUser.uid, hora: h.length === 5 ? h+":00" : h, nombre: n || "Sin nombre", dias: dias });
+        document.getElementById('t-nombre').value = ""; // Limpiar campo
     }
 
     setInterval(() => {
@@ -180,7 +186,7 @@
             if(diff < 0) diff = 0;
             let hh = Math.floor(diff/3600).toString().padStart(2,'0'), mm = Math.floor((diff%3600)/60).toString().padStart(2,'0'), ss = (diff%60).toString().padStart(2,'0');
             dispC.innerText = `${hh}:${mm}:${ss}`;
-        } else { dispC.innerText = "00:00:00"; dispC.classList.remove('alerta-30s', 'parpadeo-5s'); }
+        } else { dispC.innerText = "00:00:00"; }
     }, 1000);
 </script>
 </body>
