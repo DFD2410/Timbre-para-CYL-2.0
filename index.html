@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA TIMBRE v23.1</title>
+    <title>SISTEMA TIMBRE v24</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -14,16 +14,7 @@
         body { font-family: 'Rajdhani', sans-serif; background: var(--fondo); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; }
         
         #app { display: none; width: 100%; max-width: 650px; padding-top: 40px; position: relative; }
-        
-        /* BOTÓN CERRAR SESIÓN MEJORADO */
-        .header-tools { width: 100%; display: flex; justify-content: flex-end; margin-bottom: 10px; }
-        .btn-logout { 
-            background: var(--rojo); color: white; border: none; 
-            padding: 10px 20px; border-radius: 12px; font-family: 'Orbitron';
-            font-size: 0.8rem; cursor: pointer; font-weight: 900;
-            box-shadow: 0 0 15px rgba(255,0,68,0.4); transition: 0.3s;
-        }
-        .btn-logout:hover { transform: scale(1.05); background: #cc0033; }
+        .btn-logout { position: absolute; top: 0; right: 0; background: var(--rojo); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-family: 'Orbitron'; font-size: 0.8rem; cursor: pointer; font-weight: 900; }
 
         .tarjeta { background: var(--panel); padding: 25px; border-radius: 30px; border: 1px solid #222; text-align: center; margin-bottom: 20px; }
         #reloj-actual { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; color: var(--cian); text-shadow: 0 0 20px var(--cian); }
@@ -44,28 +35,21 @@
 <body>
 
     <div id="login-overlay" style="position:fixed; inset:0; background:#000; display:flex; justify-content:center; align-items:center; z-index:5000;">
-        <div style="background:#111; padding:30px; border-radius:25px; border:2px solid var(--cian); width:340px; text-align:center;">
+        <div style="background:#111; padding:40px; border-radius:30px; border:2px solid var(--cian); width:340px; text-align:center;">
             <h2 style="color:var(--cian); font-family:'Orbitron'; margin-bottom:20px;">ACCESO CLOUD</h2>
-            <input type="email" id="correo" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:8px;">
-            <input type="password" id="clave" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:8px;">
+            <input type="email" id="correo" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
+            <input type="password" id="clave" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
             <button class="btn-cian" onclick="ejecutarAuth()">INICIAR SESIÓN / REGISTRO</button>
         </div>
     </div>
 
     <div id="app">
-        <div class="header-tools">
-            <button class="btn-logout" onclick="auth.signOut()">CERRAR SESIÓN</button>
-        </div>
-
+        <button class="btn-logout" onclick="auth.signOut()">CERRAR SESIÓN</button>
         <div class="tarjeta">
             <div id="fecha-texto" style="font-size:1.2rem; color:#aaa; text-transform:uppercase;">...</div>
             <div id="tipo-dia">DÍA LECTIVO</div>
             <div id="reloj-actual">00:00:00</div>
-            
-            <div class="pantalla-prox">
-                <div id="cuenta-atras">00:00:00</div>
-            </div>
-
+            <div class="pantalla-prox"><div id="cuenta-atras">00:00:00</div></div>
             <div style="background:#000; padding:20px; border-radius:25px; border:1px solid #222; text-align: left;">
                 <p id="audio-label" style="font-weight:bold; color:var(--cian); font-size:0.8rem; margin-bottom:10px;">Audio No Vinculado</p>
                 <input type="file" id="f-in" style="display:none" accept="audio/*" onchange="subirAudio(this)">
@@ -138,4 +122,66 @@
                 pintarTimbres(); 
             });
             db.collection("biblioteca").where("uid", "==", user.uid).onSnapshot(snap => { audiosCloud = snap.docs.map(doc => ({id: doc.id, ...doc.data()})); });
-            db.collection("config").doc(user
+            db.collection("config").doc(user.uid).onSnapshot(doc => {
+                if(doc.exists) {
+                    const id = doc.data().audioActivoId;
+                    const audio = audiosCloud.find(a => a.id === id);
+                    if(audio) { player.src = audio.data; document.getElementById('audio-label').innerText = "VINCULADO: " + audio.nombre; }
+                }
+            });
+        } else {
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+        }
+    });
+
+    function pintarTimbres() {
+        const dSem = ["D", "L", "M", "X", "J", "V", "S"];
+        timbres.sort((a,b) => a.hora.localeCompare(b.hora));
+        document.getElementById('lista-cloud').innerHTML = timbres.map(t => `
+            <div class="item-cloud">
+                <div style="text-align:left;">
+                    <span style="font-family:Orbitron; font-size:1.8rem; color:var(--cian); display:block;">${t.hora.substring(0,5)}</span>
+                    <span style="color:var(--purpura); font-weight:bold;">${t.dias ? t.dias.map(d => dSem[d]).join(" ") : ""}</span>
+                </div>
+                <button onclick="db.collection('timbres').doc('${t.id}').delete()" style="background:#333; color:white; border:none; padding:10px; border-radius:10px; cursor:pointer;">X</button>
+            </div>`).join('');
+    }
+
+    async function subirTimbre() {
+        const h = document.getElementById('h-in').value;
+        const dias = Array.from(document.querySelectorAll('.d-check:checked')).map(c => c.value);
+        if(!h || dias.length === 0) return;
+        await db.collection("timbres").add({ uid: auth.currentUser.uid, hora: h.length === 5 ? h+":00" : h, dias: dias });
+    }
+
+    setInterval(() => {
+        const ahora = new Date();
+        const diaSem = ahora.getDay();
+        const hStr = ahora.toTimeString().split(' ')[0];
+        document.getElementById('reloj-actual').innerText = ahora.toLocaleTimeString();
+        document.getElementById('fecha-texto').innerText = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+
+        let tipoTxt = "DÍA LECTIVO"; let col = "#004422";
+        if(diaSem === 0 || diaSem === 6) { tipoTxt = "FIN DE SEMANA"; col = "#444"; }
+        const badge = document.getElementById('tipo-dia'); badge.innerText = tipoTxt; badge.style.background = col;
+
+        timbres.forEach(t => { if(t.hora === hStr && t.dias.includes(diaSem.toString()) && audioUnlocked) { player.currentTime = 0; player.play(); } });
+
+        const prox = timbres.filter(t => t.dias.includes(diaSem.toString()) && t.hora > hStr).sort((a,b) => a.hora.localeCompare(b.hora))[0];
+        const dispC = document.getElementById('cuenta-atras');
+        if(prox) {
+            let [h, m, s] = prox.hora.split(':');
+            let tD = new Date(); tD.setHours(h, m, s, 0);
+            let diff = Math.floor((tD.getTime() - ahora.getTime()) / 1000);
+            dispC.classList.remove('alerta-30s', 'parpadeo-5s');
+            if(diff <= 5 && diff >= 0) dispC.classList.add('parpadeo-5s');
+            else if(diff <= 30 && diff >= 0) dispC.classList.add('alerta-30s');
+            if(diff < 0) diff = 0;
+            let hh = Math.floor(diff/3600).toString().padStart(2,'0'), mm = Math.floor((diff%3600)/60).toString().padStart(2,'0'), ss = (diff%60).toString().padStart(2,'0');
+            dispC.innerText = `${hh}:${mm}:${ss}`;
+        } else { dispC.innerText = "00:00:00"; dispC.classList.remove('alerta-30s', 'parpadeo-5s'); }
+    }, 1000);
+</script>
+</body>
+</html>
