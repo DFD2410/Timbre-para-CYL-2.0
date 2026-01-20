@@ -2,75 +2,76 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA TIMBRE v25</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TIMBRE v31.1 - FIX CONTADOR</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <style>
-        :root { --cian: #00f7ff; --fondo: #050505; --panel: rgba(20, 20, 25, 1); --purpura: #bc13fe; --rojo: #ff0044; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Rajdhani', sans-serif; background: var(--fondo); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; }
-        
-        #app { display: none; width: 100%; max-width: 650px; padding-top: 40px; position: relative; }
-        .btn-logout { position: absolute; top: 0; right: 0; background: var(--rojo); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-family: 'Orbitron'; font-size: 0.8rem; cursor: pointer; font-weight: 900; }
-
-        .tarjeta { background: var(--panel); padding: 25px; border-radius: 30px; border: 1px solid #222; text-align: center; margin-bottom: 20px; }
-        #reloj-actual { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; color: var(--cian); text-shadow: 0 0 20px var(--cian); }
-        #tipo-dia { font-size: 1rem; padding: 8px 20px; border-radius: 50px; display: inline-block; margin: 10px 0; font-weight: 900; text-transform: uppercase; }
-        
-        .pantalla-prox { background: #000; padding: 20px; border-radius: 25px; border: 3px solid var(--purpura); margin: 15px 0; }
-        #cuenta-atras { font-family: 'Orbitron', sans-serif; font-size: 4.5rem; font-weight: 900; }
-        
-        .alerta-30s { color: var(--rojo) !important; text-shadow: 0 0 15px var(--rojo); }
-        @keyframes parpadeo { 0%, 100% { opacity: 1; color: var(--rojo); } 50% { opacity: 0.2; color: white; } }
-        .parpadeo-5s { animation: parpadeo 0.4s infinite; }
-
-        .item-cloud { background: #111; padding: 15px; border-radius: 20px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
-        .btn-cian { background: var(--cian); color: #000; font-weight: 900; width: 100%; padding: 15px; border-radius: 15px; border: none; cursor: pointer; font-family: 'Orbitron'; }
-        
-        input { background: #000; color: white; border: 1px solid #333; width: 100%; padding: 12px; border-radius: 10px; margin-bottom: 10px; font-family: 'Rajdhani'; font-size: 1.1rem; }
+        :root { --cian: #00f7ff; --fondo: #050505; --panel: #141419; --purpura: #bc13fe; --rojo: #ff0044; --naranja: #ff6600; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Rajdhani', sans-serif; background: var(--fondo); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; transition: background 0.4s; }
+        body.edit-active { background: var(--naranja); }
+        #app { display: none; width: 100%; max-width: 500px; padding-top: 50px; position: relative; }
+        .btn-logout { position: absolute; top: 5px; right: 0; background: var(--rojo); color: white; border: none; padding: 10px 15px; border-radius: 12px; font-family: 'Orbitron'; font-size: 0.7rem; cursor: pointer; font-weight: 900; z-index: 1000; }
+        .tarjeta { background: var(--panel); padding: 20px; border-radius: 25px; border: 1px solid #222; text-align: center; margin-bottom: 15px; width: 100%; }
+        #reloj-actual { font-family: 'Orbitron', sans-serif; font-size: 3rem; color: var(--cian); text-shadow: 0 0 15px var(--cian); }
+        #tipo-dia { font-size: 0.9rem; padding: 6px 15px; border-radius: 50px; display: inline-block; font-weight: 900; text-transform: uppercase; background: #333; margin-bottom: 10px; }
+        .pantalla-prox { background: #000; padding: 20px; border-radius: 20px; border: 3px solid var(--purpura); margin: 15px 0; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
+        #nombre-prox-timbre { font-family: 'Orbitron'; font-size: 0.8rem; color: var(--purpura); margin-bottom: 5px; text-transform: uppercase; }
+        #cuenta-atras { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; font-weight: 900; }
+        .item-cloud { background: #0a0a0a; padding: 15px; border-radius: 15px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222; }
+        input, button { width: 100%; padding: 15px; border-radius: 15px; border: none; font-family: 'Rajdhani'; font-size: 1.1rem; margin-bottom: 10px; }
+        input { background: #000; color: white; border: 1px solid #333; }
+        .btn-cian { background: var(--cian); color: #000; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; }
+        .btn-act { background: var(--purpura); color: white; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; }
+        .parpadeo-5s { animation: p5s 0.4s infinite; color: var(--rojo) !important; }
+        @keyframes p5s { 0%, 100% { opacity: 1; } 50% { opacity: 0.1; } }
     </style>
 </head>
 <body>
 
-    <div id="login-overlay" style="position:fixed; inset:0; background:#000; display:flex; justify-content:center; align-items:center; z-index:5000;">
-        <div style="background:#111; padding:40px; border-radius:30px; border:2px solid var(--cian); width:340px; text-align:center;">
-            <h2 style="color:var(--cian); font-family:'Orbitron'; margin-bottom:20px;">ACCESO CLOUD</h2>
+    <div id="login-overlay" style="position:fixed; inset:0; background:#000; display:flex; justify-content:center; align-items:center; z-index:9000;">
+        <div style="background:#111; padding:30px; border-radius:30px; border:2px solid var(--cian); width:90%; max-width:340px; text-align:center;">
+            <h2 style="color:var(--cian); font-family:'Orbitron'; margin-bottom:20px;">ACCESO</h2>
             <input type="email" id="correo" placeholder="Email">
-            <input type="password" id="clave" placeholder="Password">
-            <button class="btn-cian" onclick="ejecutarAuth()">INICIAR SESIÓN</button>
+            <input type="password" id="clave" placeholder="Contraseña">
+            <button class="btn-cian" onclick="ejecutarAuth()">ENTRAR</button>
         </div>
     </div>
 
     <div id="app">
         <button class="btn-logout" onclick="auth.signOut()">CERRAR SESIÓN</button>
         <div class="tarjeta">
-            <div id="fecha-texto" style="font-size:1.2rem; color:#aaa; text-transform:uppercase;">...</div>
             <div id="tipo-dia">DÍA LECTIVO</div>
             <div id="reloj-actual">00:00:00</div>
-            <div class="pantalla-prox"><div id="cuenta-atras">00:00:00</div></div>
-            <div style="background:#000; padding:20px; border-radius:25px; border:1px solid #222; text-align: left;">
-                <p id="audio-label" style="font-weight:bold; color:var(--cian); font-size:0.8rem; margin-bottom:10px;">Audio No Vinculado</p>
+            <div id="fecha-texto" style="color: #666; font-size: 0.9rem; text-transform: uppercase; margin-bottom:10px;">...</div>
+            <div class="pantalla-prox" id="box-c">
+                <div id="nombre-prox-timbre">CARGANDO...</div>
+                <div id="cuenta-atras">00:00:00</div>
+            </div>
+            <div style="background:#000; padding:15px; border-radius:20px; border:1px solid #222;">
+                <p id="audio-label" style="font-size:0.7rem; color:var(--cian); margin-bottom:10px; font-weight: bold;">SIN AUDIO</p>
                 <input type="file" id="f-in" style="display:none" accept="audio/*" onchange="subirAudio(this)">
-                <button onclick="document.getElementById('f-in').click()" class="btn-cian" style="font-size:0.8rem; margin-bottom:10px;">📤 CARGAR MP3</button>
-                <button onclick="activarAudio()" id="btn-master" style="background:var(--purpura); color:white; width:100%; padding:12px; border-radius:12px; border:none; cursor:pointer; font-family:'Orbitron';">🔓 ACTIVAR SONIDO</button>
+                <button onclick="document.getElementById('f-in').click()" class="btn-cian" style="font-size:0.8rem; padding: 12px;">📤 SUBIR MP3</button>
+                <button onclick="activarAudio()" id="btn-master" class="btn-act">🔓 ACTIVAR SONIDO</button>
             </div>
         </div>
 
-        <div class="tarjeta">
-            <h3 style="color:var(--cian); margin-bottom:10px; font-family:Orbitron; font-size:1rem;">NUEVO TIMBRE</h3>
-            <input type="text" id="t-nombre" placeholder="Nombre (ej: Recreo, Salida...)">
-            <input type="time" id="h-in" step="1" style="font-size:1.5rem;">
-            <div style="display:flex; justify-content:space-around; margin:10px 0;">
+        <div class="tarjeta" id="form-card">
+            <h3 id="form-titulo" style="font-family:Orbitron; font-size:0.9rem; margin-bottom:10px;">NUEVO TIMBRE</h3>
+            <input type="text" id="t-nombre" placeholder="Nombre (Ej: Recreo)">
+            <input type="time" id="h-in" step="1">
+            <div style="display:flex; justify-content:space-around; margin-bottom:15px; background:#000; padding:12px; border-radius:12px;">
                 <label><input type="checkbox" class="d-check" value="1" checked> L</label>
                 <label><input type="checkbox" class="d-check" value="2" checked> M</label>
                 <label><input type="checkbox" class="d-check" value="3" checked> X</label>
                 <label><input type="checkbox" class="d-check" value="4" checked> J</label>
                 <label><input type="checkbox" class="d-check" value="5" checked> V</label>
             </div>
-            <button class="btn-cian" onclick="subirTimbre()">GUARDAR TIMBRE</button>
+            <button id="btn-guardar" class="btn-cian" onclick="subirTimbre()">GUARDAR</button>
+            <button id="btn-cancelar" style="display:none; background:white; color:black; font-weight:bold;" onclick="cancelarEdicion()">CANCELAR</button>
             <div id="lista-cloud" style="margin-top:20px;"></div>
         </div>
     </div>
@@ -91,17 +92,19 @@
     let player = new Audio();
     let audioUnlocked = false;
     let timbres = [];
-    let audiosCloud = [];
+    let editandoID = null;
 
     async function ejecutarAuth() {
         const e = document.getElementById('correo').value;
         const p = document.getElementById('clave').value;
-        try { await auth.signInWithEmailAndPassword(e, p); } catch(err) { await auth.createUserWithEmailAndPassword(e, p); }
+        try { await auth.signInWithEmailAndPassword(e, p); } 
+        catch(err) { await auth.createUserWithEmailAndPassword(e, p); }
     }
 
     async function subirAudio(input) {
         const file = input.files[0];
         if (!file) return;
+        document.getElementById('audio-label').innerText = "SUBIENDO...";
         const reader = new FileReader();
         reader.onload = async (e) => {
             const doc = await db.collection("biblioteca").add({ uid: auth.currentUser.uid, nombre: file.name, data: e.target.result });
@@ -111,9 +114,12 @@
     }
 
     function activarAudio() {
-        player.play().then(() => { player.pause(); audioUnlocked = true; 
-        document.getElementById('btn-master').innerText = "✅ SISTEMA ACTIVO"; 
-        document.getElementById('btn-master').style.background = "#004422"; });
+        player.play().then(() => {
+            player.pause();
+            audioUnlocked = true;
+            document.getElementById('btn-master').innerText = "✅ SISTEMA LISTO";
+            document.getElementById('btn-master').style.background = "#004422";
+        });
     }
 
     auth.onAuthStateChanged(user => {
@@ -124,12 +130,14 @@
                 timbres = snap.docs.map(doc => ({id: doc.id, ...doc.data()})); 
                 pintarTimbres(); 
             });
-            db.collection("biblioteca").where("uid", "==", user.uid).onSnapshot(snap => { audiosCloud = snap.docs.map(doc => ({id: doc.id, ...doc.data()})); });
             db.collection("config").doc(user.uid).onSnapshot(doc => {
-                if(doc.exists) {
-                    const id = doc.data().audioActivoId;
-                    const audio = audiosCloud.find(a => a.id === id);
-                    if(audio) { player.src = audio.data; document.getElementById('audio-label').innerText = "VINCULADO: " + audio.nombre; }
+                if(doc.exists && doc.data().audioActivoId) {
+                    db.collection("biblioteca").doc(doc.data().audioActivoId).get().then(a => {
+                        if(a.exists()) {
+                            player.src = a.data().data;
+                            document.getElementById('audio-label').innerText = "AUDIO: " + a.data().nombre;
+                        }
+                    });
                 }
             });
         } else {
@@ -144,51 +152,85 @@
         document.getElementById('lista-cloud').innerHTML = timbres.map(t => `
             <div class="item-cloud">
                 <div style="text-align:left;">
-                    <span style="color:var(--cian); font-weight:bold; font-size:0.8rem; text-transform:uppercase;">${t.nombre || 'TIMBRE'}</span>
-                    <span style="font-family:Orbitron; font-size:1.8rem; color:white; display:block; line-height:1;">${t.hora.substring(0,5)}</span>
-                    <span style="color:var(--purpura); font-weight:bold; font-size:0.9rem;">${t.dias ? t.dias.map(d => dSem[d]).join(" ") : ""}</span>
+                    <span style="color:var(--cian); font-weight:900; font-size:0.7rem; text-transform:uppercase;">${t.nombre}</span>
+                    <div style="font-family:Orbitron; font-size:1.5rem;">${t.hora.substring(0,5)}</div>
+                    <div style="font-size:0.8rem; color:var(--purpura); font-weight:bold;">${t.dias.map(d => dSem[d]).join(" ")}</div>
                 </div>
-                <button onclick="db.collection('timbres').doc('${t.id}').delete()" style="background:#333; color:white; border:none; padding:10px; border-radius:10px; cursor:pointer;">X</button>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <button style="width:60px; padding:8px; background:var(--naranja); font-size:0.6rem; color:white;" onclick="prepararEdicion('${t.id}')">EDIT</button>
+                    <button style="width:60px; padding:8px; background:#222; font-size:0.6rem; color:white;" onclick="db.collection('timbres').doc('${t.id}').delete()">BORRAR</button>
+                </div>
             </div>`).join('');
+    }
+
+    function prepararEdicion(id) {
+        const t = timbres.find(i => i.id === id);
+        editandoID = id;
+        document.getElementById('t-nombre').value = t.nombre;
+        document.getElementById('h-in').value = t.hora;
+        document.querySelectorAll('.d-check').forEach(c => c.checked = t.dias.includes(c.value));
+        document.body.classList.add('edit-active');
+        document.getElementById('btn-guardar').innerText = "ACTUALIZAR";
+        document.getElementById('btn-cancelar').style.display = "block";
+    }
+
+    function cancelarEdicion() {
+        editandoID = null;
+        document.body.classList.remove('edit-active');
+        document.getElementById('btn-guardar').innerText = "GUARDAR";
+        document.getElementById('btn-cancelar').style.display = "none";
+        document.getElementById('t-nombre').value = "";
     }
 
     async function subirTimbre() {
         const h = document.getElementById('h-in').value;
         const n = document.getElementById('t-nombre').value;
-        const dias = Array.from(document.querySelectorAll('.d-check:checked')).map(c => c.value);
-        if(!h || dias.length === 0) return;
-        await db.collection("timbres").add({ uid: auth.currentUser.uid, hora: h.length === 5 ? h+":00" : h, nombre: n || "Sin nombre", dias: dias });
-        document.getElementById('t-nombre').value = ""; // Limpiar campo
+        const d = Array.from(document.querySelectorAll('.d-check:checked')).map(c => c.value);
+        if(!h) return;
+        const data = { uid: auth.currentUser.uid, hora: h.length===5?h+":00":h, nombre: n || "Timbre", dias: d };
+        if(editandoID) { await db.collection("timbres").doc(editandoID).update(data); cancelarEdicion(); }
+        else { await db.collection("timbres").add(data); document.getElementById('t-nombre').value = ""; }
     }
 
     setInterval(() => {
         const ahora = new Date();
-        const diaSem = ahora.getDay();
+        const dS = ahora.getDay();
         const hStr = ahora.toTimeString().split(' ')[0];
         document.getElementById('reloj-actual').innerText = ahora.toLocaleTimeString();
-        document.getElementById('fecha-texto').innerText = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        document.getElementById('fecha-texto').innerText = ahora.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
 
-        let tipoTxt = "DÍA LECTIVO"; let col = "#004422";
-        if(diaSem === 0 || diaSem === 6) { tipoTxt = "FIN DE SEMANA"; col = "#444"; }
-        const badge = document.getElementById('tipo-dia'); badge.innerText = tipoTxt; badge.style.background = col;
+        // Tipo de día
+        let tTxt = "DÍA LECTIVO"; let col = "#004422";
+        if(dS === 0 || dS === 6) { tTxt = "FIN DE SEMANA"; col = "#444"; }
+        const badge = document.getElementById('tipo-dia'); badge.innerText = tTxt; badge.style.background = col;
 
-        timbres.forEach(t => { if(t.hora === hStr && t.dias.includes(diaSem.toString()) && audioUnlocked) { player.currentTime = 0; player.play(); } });
+        // Sonar timbre
+        timbres.forEach(t => { if(t.hora === hStr && t.dias.includes(dS.toString()) && audioUnlocked) { player.currentTime = 0; player.play(); } });
 
-        const prox = timbres.filter(t => t.dias.includes(diaSem.toString()) && t.hora > hStr).sort((a,b) => a.hora.localeCompare(b.hora))[0];
+        // CUENTA ATRÁS REPARADA
+        const prox = timbres.filter(t => t.dias.includes(dS.toString()) && t.hora > hStr).sort((a,b) => a.hora.localeCompare(b.hora))[0];
         const dispC = document.getElementById('cuenta-atras');
+        const dispN = document.getElementById('nombre-prox-timbre');
+
         if(prox) {
             let [h, m, s] = prox.hora.split(':');
             let tD = new Date(); tD.setHours(h, m, s, 0);
             let diff = Math.floor((tD.getTime() - ahora.getTime()) / 1000);
-            dispC.classList.remove('alerta-30s', 'parpadeo-5s');
+            dispN.innerText = "PRÓXIMO: " + prox.nombre;
+            
+            dispC.classList.remove('parpadeo-5s');
             if(diff <= 5 && diff >= 0) dispC.classList.add('parpadeo-5s');
-            else if(diff <= 30 && diff >= 0) dispC.classList.add('alerta-30s');
-            if(diff < 0) diff = 0;
+            else if(diff <= 30 && diff >= 0) dispC.style.color = "var(--rojo)";
+            else dispC.style.color = "white";
+
             let hh = Math.floor(diff/3600).toString().padStart(2,'0'), mm = Math.floor((diff%3600)/60).toString().padStart(2,'0'), ss = (diff%60).toString().padStart(2,'0');
             dispC.innerText = `${hh}:${mm}:${ss}`;
-        } else { dispC.innerText = "00:00:00"; }
+        } else { 
+            dispC.innerText = "00:00:00"; 
+            dispN.innerText = "SIN MÁS TIMBRES HOY";
+            dispC.style.color = "white";
+        }
     }, 1000);
 </script>
 </body>
 </html>
-
